@@ -4,7 +4,7 @@ import TodoList from '../components/TodoList'
 import TaskAbi from '../../backend/build/contracts/TaskContract.json'
 import { TaskContractAddress } from '../config.js'
 import { ethers } from 'ethers'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Input } from 'postcss'
 /* 
 const tasks = [
@@ -20,6 +20,11 @@ export default function Home() {
   const [currentAccount, setCurrentAccount] = useState('');
   const [input, setInput] = useState('');
   const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    connectWallet()
+    getAllTasks()
+  }, []);
 
   // Calls Metamask to connect wallet on clicking Connect Wallet button
   const connectWallet = async () => {
@@ -51,6 +56,28 @@ export default function Home() {
 
   // Just gets all the tasks from the contract
   const getAllTasks = async () => {
+    try {
+      const { ethereum } = window
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner();
+        const TaskContract = new ethers.Contract(
+          TaskContractAddress,
+          TaskAbi.abi,
+          signer
+        );
+
+        let allTasks = await TaskContract.getMyTasks();
+        console.log(allTasks);
+        setTasks(allTasks);
+      } else {
+        console.log('ethereum object does not exist!');
+      }
+
+
+    } catch (error) {
+      console.log(error);
+    }
 
   }
 
@@ -58,7 +85,7 @@ export default function Home() {
   const addTask = async e => {
     e.preventDefault();
     let task = {
-      taskText: Input,
+      text: input,
       isDeleted: false
     }
 
@@ -73,10 +100,10 @@ export default function Home() {
           signer
         );
 
-        TaskContract.addTask(task.taskText, task.isDeleted).then(res => {
+        TaskContract.addTask(task.text, task.isDeleted).then(res => {
           setTasks([...tasks, tasks])
           console.log('Added task');
-        }).catch(err => {
+        }).catch((err) => {
           console.log(err);
         });
       } else {
@@ -85,7 +112,7 @@ export default function Home() {
     } catch (error) {
       console.log(error);
     }
-
+    setInput('');
   }
 
   // Remove tasks from front-end by filtering it out on our "back-end" / blockchain smart contract
@@ -96,7 +123,7 @@ export default function Home() {
   return (
     <div className='bg-[#97b5fe] h-screen w-screen flex justify-center py-6'>
       {!isUserLoggedIn ? <ConnectWalletButton connectWallet={connectWallet} /> :
-        correctNetwork ? <TodoList input={input} setInput={setInput} addTask={addTask} /> : <WrongNetworkMessage />}
+        correctNetwork ? <TodoList tasks={tasks} input={input} setInput={setInput} addTask={addTask} /> : <WrongNetworkMessage />}
     </div>
   )
 }

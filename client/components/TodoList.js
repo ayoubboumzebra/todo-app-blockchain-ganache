@@ -1,7 +1,7 @@
 import Navbar from './Navbar'
 import { IoMdAddCircle } from 'react-icons/io'
-
-const TodoList = (input, setInput, addTask) => <div className='w-[70%] bg-[#354ea3] py-4 px-9 rounded-[30px] overflow-y-scroll'>
+import Task from './Task';
+const TodoList = ({ tasks, input, setInput, addTask }) => <div className='w-[70%] bg-[#354ea3] py-4 px-9 rounded-[30px] overflow-y-scroll'>
   <Navbar />
   <h2 className='text-4xl bolder text-white pb-8'>
     What&apos;s up, Kevin!
@@ -23,6 +23,13 @@ const TodoList = (input, setInput, addTask) => <div className='w-[70%] bg-[#354e
   </form>
   <ul>
     {/* Loop through all tasks here using the Task component */}
+    {tasks.map(item => (
+      <Task
+        key={item.id}
+        taskText={item.text}
+      />
+
+    ))}
   </ul>
 </div>
 
