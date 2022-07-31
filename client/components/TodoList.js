@@ -1,7 +1,7 @@
 import Navbar from './Navbar'
 import { IoMdAddCircle } from 'react-icons/io'
 import Task from './Task';
-const TodoList = ({ tasks, input, setInput, addTask }) => <div className='w-[70%] bg-[#354ea3] py-4 px-9 rounded-[30px] overflow-y-scroll'>
+const TodoList = ({ tasks, input, setInput, addTask, deleteTask }) => <div className='w-[70%] bg-[#354ea3] py-4 px-9 rounded-[30px] overflow-y-scroll'>
   <Navbar />
   <h2 className='text-4xl bolder text-white pb-8'>
     What&apos;s up, Kevin!
@@ -27,6 +27,7 @@ const TodoList = ({ tasks, input, setInput, addTask }) => <div className='w-[70%
       <Task
         key={item.id}
         taskText={item.text}
+        onClick={deleteTask(item.id)}
       />
 
     ))}

@@ -68,6 +68,7 @@ export default function Home() {
         );
 
         let allTasks = await TaskContract.getMyTasks();
+        console.log("===> allTasks");
         console.log(allTasks);
         setTasks(allTasks);
       } else {
@@ -100,9 +101,9 @@ export default function Home() {
           signer
         );
 
-        TaskContract.addTask(task.text, task.isDeleted).then(res => {
-          setTasks([...tasks, tasks])
+        await TaskContract.addTask(task.text, task.isDeleted).then(res => {
           console.log('Added task');
+          setTasks([...tasks, task])
         }).catch((err) => {
           console.log(err);
         });
@@ -117,13 +118,34 @@ export default function Home() {
 
   // Remove tasks from front-end by filtering it out on our "back-end" / blockchain smart contract
   const deleteTask = key => async () => {
+    try {
+      const { ethereum } = window
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner();
+        const TaskContract = new ethers.Contract(
+          TaskContractAddress,
+          TaskAbi.abi,
+          signer
+        );
 
+        const deleteTaskTx = await TaskContract.deleteTask(key, true);
+        console.log('successfully deleted: ', deleteTaskTx);
+        let allTasks = await TaskContract.getMyTasks();
+        setTasks(allTasks);
+      } else {
+        console.log('ethereum object does not exist!');
+
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
     <div className='bg-[#97b5fe] h-screen w-screen flex justify-center py-6'>
       {!isUserLoggedIn ? <ConnectWalletButton connectWallet={connectWallet} /> :
-        correctNetwork ? <TodoList tasks={tasks} input={input} setInput={setInput} addTask={addTask} /> : <WrongNetworkMessage />}
+        correctNetwork ? <TodoList tasks={tasks} input={input} setInput={setInput} addTask={addTask} deleteTask={deleteTask} /> : <WrongNetworkMessage />}
     </div>
   )
 }
