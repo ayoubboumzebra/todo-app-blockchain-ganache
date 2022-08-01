@@ -135,7 +135,6 @@ export default function Home() {
         setTasks(allTasks);
       } else {
         console.log('ethereum object does not exist!');
-
       }
     } catch (error) {
       console.log(error);
